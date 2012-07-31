@@ -9,10 +9,11 @@ There is also a Makefile for iOS to build. And the Darwin ARMv7 binaries are alr
 
 ##Transmisson
 This demo simply transmits data between internal RAM and GPU RAM and calculates the time it costs. It is a four-step progress:
-1. Internal RAM to Internal RAM
-2. Internal RAM to GPU RAM
-3. GPU RAM to GPU RAM
-4. GPU RAM to Internal RAM
+
+* Internal RAM to Internal RAM
+* Internal RAM to GPU RAM
+* GPU RAM to GPU RAM
+* GPU RAM to Internal RAM
 
 The data size of the demo is 8 mega bytes.
 
