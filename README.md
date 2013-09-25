@@ -24,8 +24,7 @@ This demo converts the endianness of unsigned 64-bit integers.
 The number of integers are 32768.
 
 ##iOS Makefile Usage
-This Makefile is not elegantly written. You have to specify your SDK path before using it. 
-The default SDK is Xcode 4.4 with iOS 5.1 SDK.
+You have to specify your SDK path before using it. The default SDK is __Xcode 5.0 with iOS 7.0 SDK__.
 
 #Declaration
 This site is distributed under BSD license.
