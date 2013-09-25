@@ -1,1 +1,5 @@
 .DS_Store
+*.o
+endianness
+transmission
+ldid-host

@@ -1,21 +1,41 @@
-CC = /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/usr/bin/clang
-LD = /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/usr/bin/ld
-LDID = /usr/local/bin/ldid
-CFLAGS = -arch armv7 -Os -I/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS5.1.sdk/usr/include/ -I./include -framework OpenCL -miphoneos-version-min=3.0 -L/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS5.1.sdk/usr/lib/ -F/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS5.1.sdk/System/Library/PrivateFrameworks -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS5.1.sdk
-APP1 = transmission
-APP2 = endianness
+TOPDIR = $(PWD)
 
-all: $(APP1) $(APP2)
+SDKVERSION = 7.0
+DEVROOT = $(shell xcode-select --print-path)
+TOOLCHAINROOT = $(DEVROOT)/Toolchains/XcodeDefault.xctoolchain/usr/bin
+SDKROOT= $(DEVROOT)/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS$(SDKVERSION).sdk
 
-$(APP1):
-	$(CC) $(CFLAGS) -o $(APP1) $(APP1).c; \
-	$(LDID) -S $(APP1)
+CC = $(TOOLCHAINROOT)/clang -arch armv7
+CXX = $(TOOLCHAINROOT)/clang++
+LDID = $(TOPDIR)/ldid-host
+CFLAGS = -Os -I$(SDKROOT)/usr/include/ -Iinclude
+LDFLAGS = -L$(SDKROOT)/usr/lib/ -F/$(SDKROOT)/System/Library/PrivateFrameworks -framework OpenCL -miphoneos-version-min=5.0 -isysroot $(SDKROOT)
 
-$(APP2):
-	$(CC) $(CFLAGS) -o $(APP2) $(APP2).c; \
-	$(LDID) -S $(APP2)
+EXECUTABLE = transmission endianness ldid-host
+T_SRC = transmission.c
+T_OBJECTS = $(T_SRC:.c=.o)
+E_SRC = endianness.c
+E_OBJECTS = $(E_SRC:.c=.o)
+
+LDID_DIR = ldid
+S_CPPSRC = ldid.cpp
+S_CSRC = lookup2.c sha1.c
+
+all: ldid-host transmission endianness
+
+ldid-host: $(S_OBJECTS)
+	cd $(LDID_DIR); $(CXX) -O2 -o $(TOPDIR)/$@ $(S_CPPSRC) -I. -x c $(S_CSRC)
+
+transmission: $(T_OBJECTS)
+	$(CC) -o $@ $^ $(LDFLAGS)
+	$(LDID) -S $@
+
+endianness: $(E_OBJECTS)
+	$(CC) -o $@ $^ $(LDFLAGS)
+	$(LDID) -S $@
+
+%.o: %.c
+	$(CC) $(CFLAGS) -c -o $@ $<
 
 clean:
-	rm -f $(APP1) $(APP2)
-
-.PHONY: all clean
+	rm -f $(T_OBJECTS) $(E_OBJECTS) $(EXECUTABLE)
