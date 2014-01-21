@@ -5,7 +5,7 @@ DEVROOT = $(shell xcode-select --print-path)
 TOOLCHAINROOT = $(DEVROOT)/Toolchains/XcodeDefault.xctoolchain/usr/bin
 SDKROOT= $(DEVROOT)/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS$(SDKVERSION).sdk
 
-CC = $(TOOLCHAINROOT)/clang -arch armv7
+CC = $(TOOLCHAINROOT)/clang -arch armv7 -arch armv7s -arch arm64
 CXX = $(TOOLCHAINROOT)/clang++
 LDID = $(TOPDIR)/ldid-host
 CFLAGS = -Os -I$(SDKROOT)/usr/include/ -Iinclude
@@ -13,9 +13,7 @@ LDFLAGS = -L$(SDKROOT)/usr/lib/ -F/$(SDKROOT)/System/Library/PrivateFrameworks -
 
 EXECUTABLE = transmission endianness ldid-host
 T_SRC = transmission.c
-T_OBJECTS = $(T_SRC:.c=.o)
 E_SRC = endianness.c
-E_OBJECTS = $(E_SRC:.c=.o)
 
 LDID_DIR = ldid
 S_CPPSRC = ldid.cpp
@@ -26,16 +24,13 @@ all: ldid-host transmission endianness
 ldid-host: $(S_OBJECTS)
 	cd $(LDID_DIR); $(CXX) -O2 -o $(TOPDIR)/$@ $(S_CPPSRC) -I. -x c $(S_CSRC)
 
-transmission: $(T_OBJECTS)
-	$(CC) -o $@ $^ $(LDFLAGS)
+transmission: $(T_SRC)
+	$(CC) -o $@ $^ $(CFLAGS) $(LDFLAGS)
 	$(LDID) -S $@
 
-endianness: $(E_OBJECTS)
-	$(CC) -o $@ $^ $(LDFLAGS)
+endianness: $(E_SRC)
+	$(CC) -o $@ $^ $(CFLAGS) $(LDFLAGS)
 	$(LDID) -S $@
-
-%.o: %.c
-	$(CC) $(CFLAGS) -c -o $@ $<
 
 clean:
 	rm -f $(T_OBJECTS) $(E_OBJECTS) $(EXECUTABLE)
